@@ -1,0 +1,85 @@
+implement the following topology in mininet
+Router connections:
+  R1-R3:
+    ip: 200.0.0.0/30
+    bandwidth: 500M
+    propagation delay: 10ms
+  R3-R5:
+    ip: 200.0.1.0/30
+    bandwidth: 500M
+    propagation delay: 10ms
+  R5-R6:
+    ip: 200.0.2.0/30
+    bandwidth: 1G
+    propagation delay: 10ms
+  R3-R4:
+    ip: 200.0.3.0/30
+    bandwidth: 1G
+    propagation delay: 10ms
+  R4-R2:
+    ip: 200.0.4.0/30
+    bandwidth: 500M
+    propagation delay: 10ms
+
+Subnet behind R1: 
+  addresses: 10.0.0.0/24
+  hosts: H1 H2
+  bandwidth: 100M
+  propagation delay: 1ms
+
+Subnet behind R3: 
+  addresses: 10.1.0.0/24
+  hosts: H3
+  bandwidth: 100M
+  propagation delay: 1ms
+
+Subnet behind R5: 
+  addresses: 10.2.0.0/24
+  hosts: H4 H5
+  bandwidth: 100M
+  propagation delay: 0.05ms
+
+Subnet behind R6: 
+  addresses: 10.3.0.0/24
+  hosts: H6
+  bandwidth: 100M
+  propagation delay: 1ms
+
+Subnet behind R2: 
+  addresses: 10.4.0.0/24
+  hosts: PROXY S1 S2
+  bandwidth: 100M
+  propagation delay: 1ms
+
+use a SDN controller (ryu-manager) to configure addresses and flow tables for each switch. configure the routers using REST
+
+additionally:
+  - all hosts should be able to reach eachothers, except for S1 and S2 which should only be reachable by PROXY. 
+  - PROXY should implement a reverse proxy service with NGINX. every other access attempt to S1 and S2 must not be possible
+  - S1 should implement a tcp server listening on port 5555
+  - S2 should implement a udp server listening on port 5555
+  - PROXY exposes both servers on port 8888, forwarding S1's traffic on the tcpserver/ path and s2's traffic on the udpserver/ path
+  - both servers have to log in real time all applicative layer packets sent by all clients on the network. Data to be logged are the following:
+    - timestamp
+    - sender ip
+    - sender port
+    - receiver ip
+    - receiver port
+    - payload
+    - payload length
+  - H1, H2, H3 should implement a tcp client that sends packets to s1. The payload should be randomly generated with a variable length chosen at runtime. The sending interval should also be variable and assigned at runtime. If T=0, packets are sent at the maximum capacity
+  - H4, H5, H6 should implement a udp client that sends packets to s2. The payload should be randomly generated with a variable length chosen at runtime. The sending interval should also be variable and assigned at runtime. If T=0, packets are sent at the maximum capacity
+  - measure network performance in the following scenarios:
+    - every tcp host sending at maximum data-rate
+    - every udp host sending at maximum data-rate. Verify queueing problems and adjust T accordingly to get the maximum rate without congestion
+    - every tcp host sending at the same time
+  - store the logs in json format on the filesystem or database
+  - graph the results
+
+
+https://mininet.org/ 
+https://ryu.readthedocs.io/en/latest/ 
+https://osrg.github.io/ryu-book/en/html/rest_router.html 
+https://flask.palletsprojects.com/en/stable/ 
+https://github.com/Rad6/SDN-Routing-Ryu.git 
+https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/ 

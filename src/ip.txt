@@ -1,0 +1,38 @@
+Subnet behind R1: 10.0.0.0/24
+  Network address: 10.0.0.0
+  Host addresses: 10.0.0.1-254
+    R1: 10.0.0.1
+    H1: 10.0.0.2
+    H2: 10.0.0.3
+  Broadcast address: 10.0.0.255
+
+Subnet behind R3: 10.1.0.0/24
+  Network address: 10.1.0.0
+  Host addresses: 10.1.0.1-254
+    R3: 10.1.0.1
+    H3: 10.1.0.2
+  Broadcast address: 10.1.0.255
+
+Subnet behind R5: 10.2.0.0/24
+  Network address: 10.2.0.0
+  Host addresses: 10.2.0.1-254
+    R5: 10.2.0.1
+    H4: 10.2.0.2
+    H5: 10.2.0.3
+  Broadcast address: 10.2.0.255
+
+Subnet behind R6: 10.3.0.0/24
+  Network address: 10.3.0.0
+  Host addresses: 10.3.0.1-254
+    R6: 10.3.0.1
+    H6: 10.3.0.2
+  Broadcast address: 10.3.0.255
+
+Subnet behind R2: 10.4.0.0/24
+  Network address: 10.4.0.0
+  Host addresses: 10.4.0.1-254
+    R2: 10.4.0.1
+    PROXY: 10.4.0.1
+    S1: 10.4.0.2
+    S2: 10.4.0.3
+  Broadcast address: 10.4.0.255
