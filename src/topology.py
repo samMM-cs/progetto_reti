@@ -39,8 +39,8 @@ class Topology(Topo):
                      params2={"ip": "200.0.4.2/30"})
 
         # subnet behind R1
-        H1 = self.addHost("H1", ip="10.0.0.2/24")
-        H2 = self.addHost("H2", ip="10.0.0.3/24")
+        H1 = self.addHost("H1", ip="10.0.0.1/24")
+        H2 = self.addHost("H2", ip="10.0.0.2/24")
         self.addLink(R1, H1, cls=TCLink,
                      bw=100, delay="1ms")
         self.addLink(R1, H2, cls=TCLink,
