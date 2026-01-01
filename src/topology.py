@@ -2,6 +2,7 @@ from mininet.net import Mininet, CLI
 from mininet.link import TCLink
 from mininet.topo import Topo
 from mininet.node import Switch
+from mininet.node import ontroller, RemoteController, OVSKernelSwitch, UserSwitch
 
 
 class Topology(Topo):
@@ -75,9 +76,13 @@ class Topology(Topo):
         self.addLink(R2, S2, cls=TCLink,
                      bw=100, delay="1ms")
 
+
 def create_topology():
     net = Mininet(topo=Topology())
 
+    # Add Controller
+    c0 = RemoteController('c0', ip='127.0.0.1',
+                          port=6653, protocols="OpenFlow13")
     net.start()
     CLI(net)
     net.stop()
