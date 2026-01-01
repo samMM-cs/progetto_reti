@@ -2,7 +2,7 @@ from mininet.net import Mininet, CLI
 from mininet.link import TCLink
 from mininet.topo import Topo
 from mininet.node import Switch
-from mininet.node import ontroller, RemoteController, OVSKernelSwitch, UserSwitch
+from mininet.node import Controller, RemoteController, OVSKernelSwitch, UserSwitch
 
 
 class Topology(Topo):
