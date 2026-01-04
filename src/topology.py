@@ -61,12 +61,12 @@ def create_topology():
     net = Mininet(topo=Topology(), controller=c0,
                   switch=OVSKernelSwitch, link=TCLink, autoSetMacs=True)
     net.start()
-    set_routers(net)
+    set_routers_and_firewall(net)
     CLI(net)
     net.stop()
 
 
-def set_routers(net: Mininet):
+def set_routers_and_firewall(net: Mininet):
     routers = {
         'R1': {
             'dpid': '0000000000000001',
@@ -118,7 +118,7 @@ def set_routers(net: Mininet):
                 '10.1.0.0/24': 'R4',
                 '10.2.0.0/24': 'R4',
                 '10.3.0.0/24': 'R4',
-            }},
+        }},
         'R3': {
             'dpid': '0000000000000003',
             'gateway_ip': '10.1.0.1/24',
@@ -227,12 +227,14 @@ def set_routers(net: Mininet):
 
     c: RemoteController = net.controllers[0]
     for (name, data) in routers.items():
+        dpid=data['dpid']
         # set point to point addresses
         for ip in data["intf_ip"].values():
             cmd = 'curl -X POST -d \'{"address":"%s"}\' http://localhost:8080/router/%s' % \
                 (ip, data["dpid"])
             res = c.cmd(cmd)
             log(name, cmd, res)
+
         # set router addresses for subnets
         if data['subnet'] is not None:
             cmd = 'curl -X POST -d \'{"address":"%s"}\' http://localhost:8080/router/%s' % \
@@ -246,7 +248,16 @@ def set_routers(net: Mininet):
                 (subnet, routers[hop]["intf_ip"][name][:-3], data["dpid"])
             res = c.cmd(cmd)
             log(name, cmd, res)
-
+        if name == 'R2':
+            c.cmd(f"curl -X PUT http://localhost:8080/firewall/module/enable/{dpid}")
+            # DROP S1 <-> S2
+            for src, dst in [("10.4.0.3/32", "10.4.0.4/24"), ("10.4.0.4/24", "10.4.0.3/24")]:
+                cmd = (f'curl -X POST -d \'{{"src":"{src}", "dst":"{dst}", '
+                    f'"nw_proto":"ICMP", "action":"DENY", "priority":"10"}}\' '
+                    f'http://localhost:8080/firewall/rules/{dpid}')
+                c.cmd(cmd)
+            # ALLOW Generale (Essenziale per ARP e traffico da altre subnet)
+            c.cmd(f'curl -X POST -d \'{{"action":"ALLOW", "priority":"1"}}\' http://localhost:8080/firewall/rules/{dpid}')
 
 if __name__ == "__main__":
     create_topology()
