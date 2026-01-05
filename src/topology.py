@@ -76,12 +76,11 @@ def set_proxy(net: Mininet):
     # start proxy
     cmd = 'nginx -c $(pwd)/src/proxy_nginx.conf -g "daemon off;" &'
     exe_and_log(proxy, cmd)
-
     # Block traffic on S1 except coming from proxy
     # accept icmp and tcp on port 5555 from proxy, block everything else
-    cmd = 'iptables -A INPUT -p tcp -s 10.4.0.2 --dport 5555 -j ACCEPT'
+    cmd = 'iptables -A INPUT -p tcp -s 10.4.0.3 --dport 5555 -j ACCEPT'
     exe_and_log(s1, cmd)
-    cmd = 'iptables -A INPUT -p icmp -s 10.4.0.2 -j ACCEPT'
+    cmd = 'iptables -A INPUT -p icmp -s 10.4.0.3 -j ACCEPT'
     exe_and_log(s1, cmd)
     cmd = 'iptables -A INPUT -p all -j DROP'
     exe_and_log(s1, cmd)
@@ -93,6 +92,11 @@ def set_proxy(net: Mininet):
     exe_and_log(s2, cmd)
     cmd = 'iptables -A INPUT -p all -j DROP'
     exe_and_log(s2, cmd)
+
+    #Start TCP server on S1
+    cmd = 'python3 $(pwd)/src/tcp_server_s1.py &'
+    exe_and_log(s1, cmd)
+    
 
 
 def exe_and_log(exe, cmd):
