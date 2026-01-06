@@ -64,39 +64,9 @@ def create_topology():
     net.start()
     set_routers(net)
     set_proxy(net)
+    run_applicatives(net)
     CLI(net)
     net.stop()
-
-
-def set_proxy(net: Mininet):
-    s1: Host | list[Host] = net.get('S1')
-    s2: Host | list[Host] = net.get('S2')
-    proxy: Host | list[Host] = net.get('PROXY')
-
-    # start proxy
-    cmd = 'nginx -c $(pwd)/src/proxy_nginx.conf -g "daemon off;" &'
-    exe_and_log(proxy, cmd)
-    # Block traffic on S1 except coming from proxy
-    # accept icmp and tcp on port 5555 from proxy, block everything else
-    cmd = 'iptables -A INPUT -p tcp -s 10.4.0.3 --dport 5555 -j ACCEPT'
-    exe_and_log(s1, cmd)
-    cmd = 'iptables -A INPUT -p icmp -s 10.4.0.3 -j ACCEPT'
-    exe_and_log(s1, cmd)
-    cmd = 'iptables -A INPUT -p all -j DROP'
-    exe_and_log(s1, cmd)
-
-    # same for S2, but with udp
-    cmd = 'iptables -A INPUT -p udp -s 10.4.0.2 --dport 5555 -j ACCEPT'
-    exe_and_log(s2, cmd)
-    cmd = 'iptables -A INPUT -p icmp -s 10.4.0.2 -j ACCEPT'
-    exe_and_log(s2, cmd)
-    cmd = 'iptables -A INPUT -p all -j DROP'
-    exe_and_log(s2, cmd)
-
-    #Start TCP server on S1
-    cmd = 'python3 $(pwd)/src/tcp_server_s1.py &'
-    exe_and_log(s1, cmd)
-    
 
 
 def exe_and_log(exe, cmd):
@@ -129,38 +99,51 @@ def set_routers(net: Mininet):
             exe_and_log(c, cmd)
 
 
-def set_firewall(net: Mininet):
-    c: RemoteController = net.controllers[0]
-    # enable firewall on every node
-    cmd = "curl -X PUT http://localhost:8080/firewall/module/enable/all"
-    exe_and_log(c, cmd)
-    cmd = 'curl -X DELETE -d \'{"actions": "ALLOW", "rule_id": "all"}\' http://localhost:8080/firewall/rules/all'
-    exe_and_log(c, cmd)
-    cmd = 'curl -X POST -d \'{"actions": "ALLOW", "dl_type": "IPv4"}\' http://localhost:8080/firewall/rules/all'
-    exe_and_log(c, cmd)
-    cmd = 'curl -X POST -d \'{"actions": "ALLOW", "dl_type": "ARP"}\' http://localhost:8080/firewall/rules/all'
-    exe_and_log(c, cmd)
-    # for nw_proto in ["ICMP"]:
-    #     cmd = 'curl -X POST -d \'{"nw_proto": "%s"}\' http://localhost:8080/firewall/rules/all' \
-    #         % nw_proto
-    #     exe_and_log(c, cmd)
-    # cmd = 'curl -X POST -d \'{"dl_type": "%s"}\' http://localhost:8080/firewall/rules/all' \
-    #     % ("ARP")
-    # exe_and_log(c, cmd)
-    # set firewall rules on R2
-    # if name == 'R2':
-    #     # # DROP S1 <-> S2
-    #     # for src, dst in [("10.4.0.3/24", "10.4.0.4/24"), ("10.4.0.4/24", "10.4.0.3/24")]:
-    #     #     cmd = 'curl -X POST -d \'{"src":"%s", "dst":"%s", '\
-    #     #         '"nw_proto":"ICMP", "actions":"DENY", "priority":"10"}\' '\
-    #     #         'http://localhost:8080/firewall/rules/%s' \
-    #     #         % (src, dst, data["dpid"])
-    #     #     # c.cmd(cmd)
-    #     #     exe_and_log(c, cmd)
-    #     # ALLOW Generale (Essenziale per ARP e traffico da altre subnet)
-    #     cmd = 'curl -X POST -d \'{"actions":"ALLOW", "priority":"1"}\' http://localhost:8080/firewall/rules/%s' \
-    #         % data["dpid"]
-    #     exe_and_log(c, cmd)
+def set_proxy(net: Mininet):
+    s1: Host | list[Host] = net.get('S1')
+    s2: Host | list[Host] = net.get('S2')
+    proxy: Host | list[Host] = net.get('PROXY')
+
+    # start proxy
+    cmd = 'nginx -c $(pwd)/src/proxy_nginx.conf -g "daemon off;" &'
+    exe_and_log(proxy, cmd)
+    # exe_and_log(proxy, "wireshark &")
+    # input("Select interface on wireshark, press enter to continue")
+    # Block traffic on S1 except coming from proxy
+    # accept icmp and tcp on port 5555 from proxy, block everything else
+    cmd = 'iptables -A INPUT -p tcp -s 10.4.0.2 --dport 5555 -j ACCEPT -v'
+    exe_and_log(s1, cmd)
+    cmd = 'iptables -A INPUT -p icmp -s 10.4.0.2 -j ACCEPT -v'
+    exe_and_log(s1, cmd)
+    cmd = 'iptables -A INPUT -p all -j DROP -v'
+    exe_and_log(s1, cmd)
+
+    # same for S2, but with udp
+    cmd = 'iptables -A INPUT -p udp -s 10.4.0.2 --dport 5555 -j ACCEPT -v'
+    exe_and_log(s2, cmd)
+    cmd = 'iptables -A INPUT -p icmp -s 10.4.0.2 -j ACCEPT -v'
+    exe_and_log(s2, cmd)
+    cmd = 'iptables -A INPUT -p all -j DROP -v'
+    exe_and_log(s2, cmd)
+
+
+def run_applicatives(net: Mininet):
+    s1: Host | list[Host] = net.get('S1')
+    # Start TCP server on S1
+    cmd = 'python3 $(pwd)/src/tcp/tcp_server.py &'
+    exe_and_log(s1, cmd)
+
+    # start UDP server on s2 and client on h4
+    s2: Host | list[Host] = net.get('S2')
+    h4: Host | list[Host] = net.get('H4')
+    h5: Host | list[Host] = net.get('H5')
+    h6: Host | list[Host] = net.get('H6')
+    cmd = 'python3 $(pwd)/src/udp/server.py &'
+    exe_and_log(s2, cmd)
+    cmd = 'python3 $(pwd)/src/udp/client.py -T {interval} -L {length} &'
+    exe_and_log(h4, cmd.format(interval=1, length=512))
+    exe_and_log(h5, cmd.format(interval=.5, length=256))
+    exe_and_log(h6, cmd.format(interval=0, length=64))
 
 
 if __name__ == "__main__":
