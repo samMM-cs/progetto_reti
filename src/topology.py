@@ -128,10 +128,18 @@ def set_proxy(net: Mininet):
 
 
 def run_applicatives(net: Mininet):
+    # Start TCP server on S1 and clients on H1, H2, H3
     s1: Host | list[Host] = net.get('S1')
-    # Start TCP server on S1
-    cmd = 'python3 $(pwd)/src/tcp/tcp_server.py &'
+    h1:Host | list[Host] = net.get('H1')
+    h2:Host | list[Host] = net.get('H2')
+    h3:Host | list[Host] = net.get('H3')
+
+    cmd = 'python3 $(pwd)/src/tcp/server.py &'
     exe_and_log(s1, cmd)
+    cmd = 'python3 $(pwd)/src/tcp/client.py -T {interval} -L {length} &'
+    exe_and_log(h1, cmd.format(interval=1, length=512))
+    exe_and_log(h2, cmd.format(interval=.5, length=256))
+    exe_and_log(h3, cmd.format(interval=0, length=64))
 
     # start UDP server on s2 and client on h4
     s2: Host | list[Host] = net.get('S2')
