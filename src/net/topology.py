@@ -1,8 +1,13 @@
-from router_data import router_data
+from .router_data import router_data
 from mininet.net import Mininet
 from mininet.topo import Topo
 from mininet.node import RemoteController, Host
-from ..log import exe_and_log
+from mininet.log import info
+
+
+def exe_and_log(exe, cmd):
+    res = exe.cmd(cmd)
+    info(exe.name + ': ' + cmd + '\n' + str(res)+'\n\n')
 
 
 class Topology(Topo):
@@ -84,7 +89,7 @@ def set_proxy(net: Mininet):
     proxy: Host | list[Host] = net.get('PROXY')
 
     # start proxy
-    cmd = 'nginx -c $(pwd)/src/proxy_nginx.conf -g "daemon off;" &'
+    cmd = 'nginx -c $(pwd)/src/net/proxy_nginx.conf -g "daemon off;" &'
     exe_and_log(proxy, cmd)
     # exe_and_log(proxy, "wireshark &")
     # input("Select interface on wireshark, press enter to continue")

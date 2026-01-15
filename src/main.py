@@ -15,7 +15,7 @@ def create_topology():
     net.start()
     set_routers(net)
     set_proxy(net)
-    run_applicatives(net)
+    # run_applicatives(net)
     CLI(net)
     net.stop()
 

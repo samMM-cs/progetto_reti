@@ -17,28 +17,29 @@ PORT = 5555
 
 
 def echo_server(port):
-    # create TCP socket
     if not os.path.exists("./log/"):
         os.mkdir("./log")
-    handle = open("./log/tcp.log", "a")
+
+    # create TCP socket
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        # Bind socket to address and port
-        s.bind((HOST, PORT))
-        s.listen()
-        print("Server S1 in listening mode on port", PORT)
-        conn, addr = s.accept()
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        with open("./log/tcp.json", "a+") as handle:
+            # Bind socket to address and port
+            s.bind((HOST, PORT))
+            s.listen()
+            print("Server S1 in listening mode on port", PORT)
+            conn, addr = s.accept()
 
-        receiver_addr = conn.getsockname()
+            receiver_addr = conn.getsockname()
 
-        with conn:
-            print("Connected by", addr)
-            while True:
-                data = conn.recv(1024)
-                if not data:
-                    break
-                conn.sendall(data)       # echo back the received data
-                log_packet(handle, addr, receiver_addr, data)
-        handle.close()
+            with conn:
+                print("Connected by", addr)
+                while True:
+                    data = conn.recv(1024)
+                    if not data:
+                        break
+                    conn.sendall(data)       # echo back the received data
+                    log_packet(handle, addr, receiver_addr, data)
 
 
 if __name__ == '__main__':

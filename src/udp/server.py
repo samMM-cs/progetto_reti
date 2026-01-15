@@ -20,23 +20,24 @@ DGRAM_MAX_LEN = 2**16 - 1  # 16bit length
 
 def echo_server(port):
     # Create a UDP socket
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     if not os.path.exists("./log/"):
         os.mkdir("./log")
 
-    handle = open("./log/udp.log", "a")
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        with open("./log/udp.json", "a+") as udp_log:
+            # Bind the socket to the port
+            server_address = (host, port)
+            print("Starting up echo server on %s port %s" % server_address)
 
-    # Bind the socket to the port
-    server_address = (host, port)
-    print("Starting up echo server on %s port %s" % server_address)
-
-    sock.bind(server_address)
-    i = 0
-    while True:
-        data, address = sock.recvfrom(DGRAM_MAX_LEN)
-        print("%d -- received %s bytes from %s" % (i, len(data), address))
-        log_packet(handle, ("10.4.0.4", 5555), address, data)
-        i += 1
+            sock.bind(server_address)
+            i = 0
+            while True:
+                data, address = sock.recvfrom(DGRAM_MAX_LEN)
+                print("%d -- received %s bytes from %s" %
+                      (i, len(data), address))
+                log_packet(udp_log, ("10.4.0.4", 5555), address, data)
+                i += 1
 
 
 if __name__ == '__main__':
