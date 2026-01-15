@@ -1,7 +1,7 @@
 from router_data import router_data
 from mininet.net import Mininet
 from mininet.topo import Topo
-from mininet.node import RemoteController, OVSKernelSwitch, Host
+from mininet.node import RemoteController, Host
 from ..log import exe_and_log
 
 
