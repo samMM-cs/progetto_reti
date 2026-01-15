@@ -1,9 +1,8 @@
 from router_data import router_data
-from mininet.net import Mininet, CLI
-from mininet.link import TCLink
+from mininet.net import Mininet
 from mininet.topo import Topo
 from mininet.node import RemoteController, OVSKernelSwitch, Host
-from mininet.log import setLogLevel, info
+from ..log import exe_and_log
 
 
 class Topology(Topo):
@@ -52,26 +51,6 @@ class Topology(Topo):
         self.addLink(R2, PROXY, bw=100, delay="1ms")
         self.addLink(R2, S1, bw=100, delay="1ms")
         self.addLink(R2, S2, bw=100, delay="1ms")
-
-
-def create_topology():
-    setLogLevel("info")
-    # Add Controller
-    c0 = RemoteController('c0', ip='127.0.0.1',
-                          port=6653, protocols="OpenFlow13")
-    net = Mininet(topo=Topology(), controller=c0,
-                  switch=OVSKernelSwitch, link=TCLink, autoSetMacs=True)
-    net.start()
-    set_routers(net)
-    set_proxy(net)
-    run_applicatives(net)
-    CLI(net)
-    net.stop()
-
-
-def exe_and_log(exe, cmd):
-    res = exe.cmd(cmd)
-    info(exe.name + ': ' + cmd + '\n' + str(res)+'\n\n')
 
 
 def set_routers(net: Mininet):
@@ -130,9 +109,9 @@ def set_proxy(net: Mininet):
 def run_applicatives(net: Mininet):
     # Start TCP server on S1 and clients on H1, H2, H3
     s1: Host | list[Host] = net.get('S1')
-    h1:Host | list[Host] = net.get('H1')
-    h2:Host | list[Host] = net.get('H2')
-    h3:Host | list[Host] = net.get('H3')
+    h1: Host | list[Host] = net.get('H1')
+    h2: Host | list[Host] = net.get('H2')
+    h3: Host | list[Host] = net.get('H3')
 
     cmd = 'python3 $(pwd)/src/tcp/server.py &'
     exe_and_log(s1, cmd)
@@ -152,7 +131,3 @@ def run_applicatives(net: Mininet):
     exe_and_log(h4, cmd.format(interval=1, length=512))
     exe_and_log(h5, cmd.format(interval=.5, length=256))
     exe_and_log(h6, cmd.format(interval=0, length=64))
-
-
-if __name__ == "__main__":
-    create_topology()

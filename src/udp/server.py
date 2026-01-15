@@ -1,10 +1,8 @@
 import socket
 import os
-# fmt: off
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from log import log
-# fmt: on
+
+from ..log import log_packet
+
 host = '0.0.0.0'
 DGRAM_MAX_LEN = 2**16 - 1  # 16bit length
 
@@ -37,7 +35,7 @@ def echo_server(port):
     while True:
         data, address = sock.recvfrom(DGRAM_MAX_LEN)
         print("%d -- received %s bytes from %s" % (i, len(data), address))
-        log(handle, ("10.4.0.4", 5555), address, data)
+        log_packet(handle, ("10.4.0.4", 5555), address, data)
         i += 1
 
 
