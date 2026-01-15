@@ -111,28 +111,14 @@ def set_proxy(net: Mininet):
     exe_and_log(s2, cmd)
 
 
-def run_applicatives(net: Mininet):
+def start_servers(net: Mininet):
     # Start TCP server on S1 and clients on H1, H2, H3
     s1: Host | list[Host] = net.get('S1')
-    h1: Host | list[Host] = net.get('H1')
-    h2: Host | list[Host] = net.get('H2')
-    h3: Host | list[Host] = net.get('H3')
 
     cmd = 'python3 $(pwd)/src/tcp/server.py &'
     exe_and_log(s1, cmd)
-    cmd = 'python3 $(pwd)/src/tcp/client.py -T {interval} -L {length} &'
-    exe_and_log(h1, cmd.format(interval=1, length=512))
-    exe_and_log(h2, cmd.format(interval=.5, length=256))
-    exe_and_log(h3, cmd.format(interval=0, length=64))
 
     # start UDP server on s2 and client on h4
     s2: Host | list[Host] = net.get('S2')
-    h4: Host | list[Host] = net.get('H4')
-    h5: Host | list[Host] = net.get('H5')
-    h6: Host | list[Host] = net.get('H6')
     cmd = 'python3 $(pwd)/src/udp/server.py &'
     exe_and_log(s2, cmd)
-    cmd = 'python3 $(pwd)/src/udp/client.py -T {interval} -L {length} &'
-    exe_and_log(h4, cmd.format(interval=1, length=512))
-    exe_and_log(h5, cmd.format(interval=.5, length=256))
-    exe_and_log(h6, cmd.format(interval=0, length=64))
