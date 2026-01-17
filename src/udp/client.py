@@ -16,6 +16,7 @@ server_address = (PROXY, SERVER_PORT)
 
 
 def udp_client(interval, length):
+    start = time.time()
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     print("Connecting to %s port %s" % server_address)
@@ -23,9 +24,9 @@ def udp_client(interval, length):
     i = 0
     while True:
         payload = os.urandom(length)
-
         sent = sock.sendto(payload, server_address)
-        print("%d - Sent %s/%s bytes" % (i, length, sent))
+        # if i % 100 == 0:
+        #     print("%d - Sent %s/%s bytes" % (i, length, sent))
         time.sleep(interval)
         i += 1
 

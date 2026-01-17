@@ -1,3 +1,3 @@
-from .log import log_packet
+from .log import dump_to_file, build_json_entry
 
-__all__ = ['log_packet']
+__all__ = ["dump_to_file", "build_json_entry"]
