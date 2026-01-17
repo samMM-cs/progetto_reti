@@ -1,6 +1,6 @@
 from mininet.net import Mininet
 from mininet.node import Node
-
+from mininet.log import info
 # throughput and congestion tests:
 # for each host, length, interval combination send packets for 30 seconds
 # check how many are dropped and the effective throughput
@@ -8,6 +8,12 @@ from mininet.node import Node
 LENGTHS = [64, 512, 1472, 1500, 4096]
 INTERVALS = [0, .001, .01, .1, .5, 1]
 DURATION = 30
+DIRECTORY = "./log/"
+
+
+def exe_and_log(exe, cmd):
+    res = exe.cmd(cmd)
+    info(exe.name + ': ' + cmd + '\n' + str(res)+'\n\n')
 
 
 def test(net: Mininet, tcp: bool = True):
@@ -20,8 +26,8 @@ def test(net: Mininet, tcp: bool = True):
         assert isinstance(host, Node)
         for interval in INTERVALS:
             for length in LENGTHS:
-                log_file = f"./log_{host.name}_{interval}_{length}_{proto}.json"
-                server.cmd(f"python -m src.{proto}.server -f {log_file} &")
-                host.cmd(
-                    f"timeout {DURATION} python -m src.{proto}.client -T {interval} -L {length}")
-                server.cmd(f"pkill -f 'python -m src.{proto}.server'")
+                log_file = f"log_{host.name}_{interval}_{length}_{proto}.json"
+                exe_and_log(server,
+                            f"python3 -m src.{proto}.server -f {DIRECTORY}server_{log_file} &")
+                exe_and_log(host,
+                            f"python3 -m src.{proto}.client -T {interval} -L {length} -f {DIRECTORY}client_{log_file} -D {DURATION}")

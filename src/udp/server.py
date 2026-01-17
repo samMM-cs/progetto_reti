@@ -7,6 +7,7 @@ DGRAM_MAX_LEN = 2**16 - 1  # 16bit length
 
 
 def server(port, file):
+    print("Starting udp server")
     # build log in memory and dump it to file at the end
     log = []
     try:
@@ -15,14 +16,15 @@ def server(port, file):
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             # fail after 5 seconds
             sock.settimeout(5)
-            s2_ip = socket.gethostbyname(socket.gethostname())
             server_address = (host, port)
             sock.bind(server_address)
             while True:
                 data, address = sock.recvfrom(DGRAM_MAX_LEN)
-                log.append(build_json_entry((s2_ip, 5555), address, data))
+                log.append(build_json_entry(("10.4.0.4", 5555), address, data))
     except socket.timeout:
         with open(file, "w+") as handle:
+            tot = sum(rec["payload_length"] for rec in log)
+            print(f"writing to disk {len(log)} packets ({tot} bytes)")
             dump_to_file(handle, log)
 
 

@@ -15,20 +15,29 @@ SERVER_PORT = 8888  # send to port 8888 of proxy
 server_address = (PROXY, SERVER_PORT)
 
 
-def udp_client(interval, length):
+def udp_client(interval, length, duration, file):
     start = time.time()
+    n_packets = 0
+    data_sent = 0
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     print("Connecting to %s port %s" % server_address)
 
-    i = 0
-    while True:
+    while time.time() - start <= duration:
         payload = os.urandom(length)
         sent = sock.sendto(payload, server_address)
+        data_sent += sent
+        n_packets += 1
         # if i % 100 == 0:
         #     print("%d - Sent %s/%s bytes" % (i, length, sent))
-        time.sleep(interval)
-        i += 1
+        if interval > 0:
+            time.sleep(interval)
+
+    # smth = f"sent {n_packets} packets ({data_sent} bytes) in {time.time() - start} s"
+    smth = f'{{"sent": {n_packets}, "data": {data_sent}, "time": {time.time() - start}}}'
+    # print(smth)
+    with open(file, "+w") as f:
+        f.write(smth+'\n')
 
 
 if __name__ == '__main__':
@@ -38,9 +47,14 @@ if __name__ == '__main__':
                         type=float, required=True, help='Sending interval, 0 to flood (%(type))')
     parser.add_argument('-L', '--length', dest='length',
                         type=int, required=True, help='Packet length (%(type))')
+    parser.add_argument('-D', '--duration', dest='duration',
+                        type=int, default=30, help='Duration (%(type))')
+    parser.add_argument('-f', '--file', dest='file',
+                        required=True, help='File to write diagnostics (%(type))')
     given_args = parser.parse_args()
 
     length = given_args.length
     interval = given_args.interval
-
-    udp_client(interval, length)
+    duration = given_args.duration
+    file = given_args.file
+    udp_client(interval, length, duration, file)
