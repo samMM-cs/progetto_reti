@@ -116,7 +116,7 @@ def start_servers(net: Mininet):
     s1: Host | list[Host] = net.get('S1')
 
     # cmd = 'python3 $(pwd)/src/tcp/server.py &'
-    cmd = 'python3 -m src.tcp.server &'
+    cmd = 'python3 -m src.tcp.server'
     exe_and_log(s1, cmd)
 
     # start UDP server on s2 and client on h4
