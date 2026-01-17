@@ -23,16 +23,16 @@ def server(port,file):
     try:
         with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as sock:
             #Create TCP socket
-            sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+            #sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEA DDR,1)
 
             #fail after 5 seconds
-            sock.settimeout(5)
+            #sock.settimeout(5)
 
             server_address=(HOST,port)
             sock.bind(server_address)
+            print("Listen...")
             sock.listen()
 
-        while True:
             conn,sender_addr=sock.accept()
             with conn:
                 receiver_addr = conn.getsockname()
@@ -40,6 +40,7 @@ def server(port,file):
                     data = conn.recv(1024)
                     if not data:
                         break
+                    print(f"Ricevuti {len(data)} byte da {sender_addr}")
                     entry = build_json_entry(
                         receiver_address=receiver_addr,
                         sender_address=sender_addr,
@@ -62,5 +63,5 @@ if __name__ == '__main__':
 
     port = given_args.port
     file = given_args.file
-    server(port, file)
+    server(port,file)
 
