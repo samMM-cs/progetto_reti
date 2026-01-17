@@ -1,50 +1,39 @@
+import argparse
 import socket
-import os
-
-from ..log import log_packet
+from ..log import build_json_entry, dump_to_file
 
 host = '0.0.0.0'
 DGRAM_MAX_LEN = 2**16 - 1  # 16bit length
 
-# I due server devono effettuare log in tempo reale di tutti i pacchetti
-# di livello applicativo inviati da tutti gli host cliente della rete.
-# Le informazioni sono le seguenti:
-# a. Timestamp
-# b. IP sender
-# c. Port sender
-# d. IP receiver
-# e. Port receiver
-# f. Payload
-# g. Payload length
 
-
-def echo_server(port):
-    # Create a UDP socket
-    if not os.path.exists("./log/"):
-        os.mkdir("./log")
-
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        with open("./log/udp.json", "a+") as udp_log:
-            # Bind the socket to the port
+def server(port, file):
+    # build log in memory and dump it to file at the end
+    log = []
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            # allow socket to reuse the address in case it crashes
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            # fail after 5 seconds
+            sock.settimeout(5)
+            s2_ip = socket.gethostbyname(socket.gethostname())
             server_address = (host, port)
-            print("Starting up echo server on %s port %s" % server_address)
-
             sock.bind(server_address)
-            i = 0
             while True:
                 data, address = sock.recvfrom(DGRAM_MAX_LEN)
-                print("%d -- received %s bytes from %s" %
-                      (i, len(data), address))
-                log_packet(udp_log, ("10.4.0.4", 5555), address, data)
-                i += 1
+                log.append(build_json_entry((s2_ip, 5555), address, data))
+    except socket.timeout:
+        with open(file, "w+") as handle:
+            dump_to_file(handle, log)
 
 
 if __name__ == '__main__':
-    """
-    parser = argparse.ArgumentParser(description='Socket Server Example')
-    parser.add_argument('--port', action="store", dest="port", type=int, required=True)
+    parser = argparse.ArgumentParser(description='UDP server')
+    parser.add_argument('-p', '--port', dest='port',
+                        type=int, default=5555, help='Port to listen to (%(type))')
+    parser.add_argument('-f', '--file', dest='file',
+                        required=True, help='File to log to')
     given_args = parser.parse_args()
+
     port = given_args.port
-    """
-    echo_server(5555)
+    file = given_args.file
+    server(port, file)
