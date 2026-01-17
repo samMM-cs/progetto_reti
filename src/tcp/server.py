@@ -4,7 +4,6 @@ import os
 from ..log import build_json_entry, dump_to_file
 
 HOST = '0.0.0.0'
-PORT = 5555
 
 # I due server devono effettuare log in tempo reale di tutti i pacchetti
 # di livello applicativo inviati da tutti gli host cliente della rete.
@@ -29,7 +28,8 @@ def server(port,file):
             #fail after 5 seconds
             sock.settimeout(5)
 
-            sock.bind(HOST,port)
+            server_address=(HOST,port)
+            sock.bind(server_address)
             sock.listen()
 
         while True:
