@@ -29,24 +29,27 @@ def server(port,file):
             #fail after 5 seconds
             sock.settimeout(5)
 
-            s1_ip=socket.gethostbyname(socket.gethostname())
-            server_adress=(HOST, port)
-            sock.bind(server_adress)
+            sock.bind(HOST,port)
             sock.listen()
 
-            conn,send_addr=sock.accept()
-
-            receiver_addr=conn.getsockName()
+        while True:
+            conn,sender_addr=sock.accept()
             with conn:
+                receiver_addr = conn.getsockname()
                 while True:
-                    data=conn.recv(1024)
-                    if not data: 
+                    data = conn.recv(1024)
+                    if not data:
                         break
-                entry=build_json_entry(receiver_address=receiver_addr,sender_address=send_addr,payload=data)
-                log.append(entry)
+                    entry = build_json_entry(
+                        receiver_address=receiver_addr,
+                        sender_address=sender_addr,
+                        payload=data
+                    )
+                    # Scrivi subito su file (append) per log real-time
+                    with open(file, "a") as handle:
+                        dump_to_file(handle, [entry])
     except socket.timeout:
-        with open(file,"w+") as handle:
-            dump_to_file(handle,log)
+        print("Server stopped")
 
 
 if __name__ == '__main__':
