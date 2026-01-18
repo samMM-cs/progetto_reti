@@ -23,10 +23,10 @@ def server(port,file):
     try:
         with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as sock:
             #Create TCP socket
-            #sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEA DDR,1)
+            sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 
             #fail after 5 seconds
-            #sock.settimeout(5)
+            sock.settimeout(5)
 
             server_address=(HOST,port)
             sock.bind(server_address)
@@ -47,10 +47,10 @@ def server(port,file):
                         payload=data
                     )
                     # Scrivi subito su file (append) per log real-time
-                    with open(file, "a") as handle:
-                        dump_to_file(handle, [entry])
+                    log.append(entry)
     except socket.timeout:
-        print("Server stopped")
+        with open(file, "a") as handle:
+            dump_to_file(handle, log)
 
 
 if __name__ == '__main__':
