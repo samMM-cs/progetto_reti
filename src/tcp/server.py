@@ -17,23 +17,23 @@ HOST = '0.0.0.0'
 # g. Payload length
 
 
-def server(port,file):
+def server(port, file):
     # build log in memory and dump it to file at the end
-    log=[]
+    log = []
     try:
-        with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as sock:
-            #Create TCP socket
-            #sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEA DDR,1)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            # Create TCP socket
+            # sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEA DDR,1)
 
-            #fail after 5 seconds
-            #sock.settimeout(5)
+            # fail after 5 seconds
+            # sock.settimeout(5)
 
-            server_address=(HOST,port)
+            server_address = (HOST, port)
             sock.bind(server_address)
             print("Listen...")
             sock.listen()
 
-            conn,sender_addr=sock.accept()
+            conn, sender_addr = sock.accept()
             with conn:
                 receiver_addr = conn.getsockname()
                 while True:
@@ -63,5 +63,4 @@ if __name__ == '__main__':
 
     port = given_args.port
     file = given_args.file
-    server(port,file)
-
+    server(port, file)
