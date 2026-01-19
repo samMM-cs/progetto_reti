@@ -1,9 +1,9 @@
 from mininet.net import Mininet, CLI
-from mininet.node import RemoteController, OVSKernelSwitch, Node
+from mininet.node import RemoteController, OVSKernelSwitch
 from mininet.link import TCLink
 from mininet.log import setLogLevel
-from net.topology import Topology, set_routers, set_proxy, start_servers
-from test import test
+from net.topology import Topology, set_routers, set_proxy
+from net_test import test
 
 
 def create_topology():

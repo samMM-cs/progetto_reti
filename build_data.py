@@ -1,11 +1,9 @@
 from datetime import datetime
 from json import load, dump
+from src.net_test import lengths, intervals, directory
 
 
 def coalesce_logs():
-  lengths = [64, 512, 1472, 1500, 2048, 4096]
-  intervals = [0, .001, .01, .1, .5, 1]
-  directory = "./log2/"
   proto = "udp"
   hosts = ["H4", "H5", "H6"]
   full_log = dict()
