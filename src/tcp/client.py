@@ -17,19 +17,32 @@ server_address = (PROXY, SERVER_PORT)
 
 def tcp_client(interval, length, duration, file):
   start = time.time()
-  sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  sock.connect(server_address)
+  with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.connect(server_address)
+    n_packets = 0
+    data_sent = 0
 
-  print("Connecting to %s port %s" % server_address)
+    print("Connecting to %s port %s" % server_address)
 
-  i = 0
-  while time.time() - start <= duration:
-    payload = os.urandom(length)  # generate random payload
-    sock.sendall(payload)
+    while time.time() - start <= duration:
+      payload = os.urandom(length)  # generate random payload
+      sock.sendall(payload)
+      # print(f"sending {len(payload)}")
+      n_packets += 1
+      data_sent += len(payload)
+      if interval > 0:
+        time.sleep(interval)
 
-    if interval > 0:
-      time.sleep(interval)
-    i += 1
+    try:
+      sock.shutdown(socket.SHUT_WR)
+    except:
+      pass
+
+  smth = f'{{"sent": {n_packets}, "data": {data_sent}, "time": {time.time() - start}}}'
+  # print(smth)
+  with open(file, "+w") as f:
+    f.write(smth + '\n')
 
 
 if __name__ == '__main__':

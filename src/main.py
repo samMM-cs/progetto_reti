@@ -3,7 +3,7 @@ from mininet.node import RemoteController, OVSKernelSwitch
 from mininet.link import TCLink
 from mininet.log import setLogLevel
 from net.topology import Topology, set_routers, set_proxy
-from net_test import test
+from net_test import missing_tests, test, test_all_together
 
 
 def create_topology():
@@ -17,7 +17,9 @@ def create_topology():
   set_routers(net)
   set_proxy(net)
   net.pingAll("1s")
-  test(net, False)
+  # test(net, True)
+  # missing_tests(net)
+  test_all_together(net)
   CLI(net)
   net.stop()
 
